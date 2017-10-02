@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Pong</title>
+    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="style.css">
+    <script
+    src="https://code.jquery.com/jquery-3.2.1.min.js"
+    integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+    crossorigin="anonymous"></script>
+</head>
+<body>   
+    <div class="score" id="score1">0</div>
+    <div class="score" id="score2">0</div>
+    <div class="paddle" id="paddle1"></div>
+    <div class="paddle" id="paddle2"></div>
+    <div id="ball"></div>
+    <div id="net"></div>
+</body>
+<script>
+    Game = {
+        maxFPS: 60
+    };
+    Controls = {
+        up1: 87,
+        down1: 83,
+        up2: 38,
+        down2: 40
+    }
+    function setup() {
+        setInterval(update, 1000/Game.maxFPS);   
+    }
+
+    function update() {
+        let score1 = parseInt($('#score1').text());
+        let score2 = parseInt($('#score2').text());
+        let paddle1 = $('#paddle1');
+        let paddle2 = $('#paddle2');
+        let ball = $('#ball');
+        let net = $('#net');
+        score++;
+        $('#score1').text(score);
+    }
+
+    $('body').keydown(function(e) {
+        if (e.which == Controls.up1) {
+
+        }
+        if (e.which == Controls.down1) {
+            
+        }
+        if (e.which == Controls.up2) {
+            
+        }
+        if (e.which == Controls.down2) {
+            
+        }
+    })
+
+    setup();
+</script>
+</html>
