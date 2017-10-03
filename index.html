@@ -27,7 +27,6 @@
         score2: parseInt($('#score2').text()),
         paddle1: $('#paddle1'),
         paddle2: $('#paddle2'),
-        ball: $('#ball'),
         net: $('#net')
     };
     Controls = {
@@ -36,47 +35,78 @@
         up2: 38,
         down2: 40
     };
-    BallSpeed = {
-        x: 0,
-        y: 0
+    Ball = {
+        ball: $('#ball'),
+        x: $('#ball').position().left,
+        y: $('#ball').position().top,
+        xspeed: 0,
+        yspeed: 0
     }
+
     function game() {
-        firstBallMove();
+        reset();
         setInterval(update, 1000/Game.maxFPS);   
     }
 
     function update() {
-        // Game.score1++;
-        // $('#score1').text(Game.score1);
         ballMovement();
-        movement();
+        paddleMovement();
+        score();
+        touchBall();
     }
 
-    function firstBallMove() {
-        BallSpeed.x = Math.random() < 0.5 ? 1 : -1;
-        BallSpeed.y = Math.random() < 0.5 ? 1 : -1;
+    function reset() {
+        Ball.ball.css('top', 'calc(50% - 8px)');
+        Ball.ball.css('left', 'calc(50% - 8px)');
+        Ball.y = Ball.ball.position().top;
+        Ball.x = Ball.ball.position().left;
+        Ball.xspeed = Math.random() < 0.5 ? 1 : -1;
+        Ball.yspeed = Math.random() < 0.5 ? 1 : -1;
+        // Ball.xspeed = -1;
+        // Ball.yspeed = 0;
     }
 
     function ballMovement() {
-        var top = Game.ball.position().top;
-        Game.ball.css('top', top - (5 * BallSpeed.y) + 'px');
-        var newtop = Game.ball.position().top;
+        Ball.ball.css('top', Ball.y - (5 * Ball.yspeed) + 'px');
+        Ball.y = Ball.ball.position().top;
         
-        var left = Game.ball.position().left;
-        Game.ball.css('left', left - (5 * BallSpeed.x) + 'px');
-        var newleft = Game.ball.position().left;
+        Ball.ball.css('left', Ball.x - (5 * Ball.xspeed) + 'px');
+        Ball.x = Ball.ball.position().left;
 
-        if (newtop < 0) {
-            Game.ball.css('top', '0px');
-            BallSpeed.y = -BallSpeed.y;
+        if (Ball.y < 0) {
+            Ball.ball.css('top', '0px');
+            Ball.yspeed = -Ball.yspeed;
         }
-        if (newtop + 16 > window.innerHeight) {
-            Game.ball.css('top', window.innerHeight - 16 + 'px');
-            BallSpeed.y = -BallSpeed.y;
+        if (Ball.y + 16 > window.innerHeight) {
+            Ball.ball.css('top', window.innerHeight - 16 + 'px');
+            Ball.yspeed = -Ball.yspeed;
         }
     }
 
-    function movement() {
+    function score() {
+        var left = Ball.ball.position().left;
+        if (left < 0) {
+            Game.score2++;
+            $('#score2').text(Game.score2);
+            reset();
+        }
+        if (left + 16 > window.innerWidth) {
+            Game.score1++;
+            $('#score1').text(Game.score1);
+            reset();
+        }
+    }
+
+    function touchBall() {
+        if ((Game.paddle1.position().left + 16) > Ball.x && Ball.y < (Game.paddle1.position().top + 64) && (Ball.y + 16) > Game.paddle1.position().top) {
+            Ball.xspeed = -Ball.xspeed;
+        }
+        if ((Ball.x + 16) > Game.paddle2.position().left && Ball.y < (Game.paddle2.position().top + 64) && (Ball.y + 16) > Game.paddle2.position().top) {
+            Ball.xspeed = -Ball.xspeed;
+        }
+    }
+
+    function paddleMovement() {
         $('body').keydown(function(e) {
             if (e.which == Controls.up1) {
                 moveUp(Game.paddle1);
@@ -92,6 +122,15 @@
             }
             e.stopImmediatePropagation();
         });
+
+        $('body').mousemove(function(e) {
+            if (e.pageY < Game.paddle2.position().top) {
+                moveUp(Game.paddle2);
+            }
+            if (e.pageY > Game.paddle2.position().top) {
+                moveDown(Game.paddle2);
+            }
+        })
     }
 
     function moveUp(paddle) {
