@@ -22,44 +22,96 @@
 </body>
 <script>
     Game = {
-        maxFPS: 60
+        maxFPS: 60,
+        score1: parseInt($('#score1').text()),
+        score2: parseInt($('#score2').text()),
+        paddle1: $('#paddle1'),
+        paddle2: $('#paddle2'),
+        ball: $('#ball'),
+        net: $('#net')
     };
     Controls = {
         up1: 87,
         down1: 83,
         up2: 38,
         down2: 40
+    };
+    BallSpeed = {
+        x: 0,
+        y: 0
     }
-    function setup() {
+    function game() {
+        firstBallMove();
         setInterval(update, 1000/Game.maxFPS);   
     }
 
     function update() {
-        let score1 = parseInt($('#score1').text());
-        let score2 = parseInt($('#score2').text());
-        let paddle1 = $('#paddle1');
-        let paddle2 = $('#paddle2');
-        let ball = $('#ball');
-        let net = $('#net');
-        score++;
-        $('#score1').text(score);
+        // Game.score1++;
+        // $('#score1').text(Game.score1);
+        ballMovement();
+        movement();
     }
 
-    $('body').keydown(function(e) {
-        if (e.which == Controls.up1) {
+    function firstBallMove() {
+        BallSpeed.x = Math.random() < 0.5 ? 1 : -1;
+        BallSpeed.y = Math.random() < 0.5 ? 1 : -1;
+    }
 
-        }
-        if (e.which == Controls.down1) {
-            
-        }
-        if (e.which == Controls.up2) {
-            
-        }
-        if (e.which == Controls.down2) {
-            
-        }
-    })
+    function ballMovement() {
+        var top = Game.ball.position().top;
+        Game.ball.css('top', top - (5 * BallSpeed.y) + 'px');
+        var newtop = Game.ball.position().top;
+        
+        var left = Game.ball.position().left;
+        Game.ball.css('left', left - (5 * BallSpeed.x) + 'px');
+        var newleft = Game.ball.position().left;
 
-    setup();
+        if (newtop < 0) {
+            Game.ball.css('top', '0px');
+            BallSpeed.y = -BallSpeed.y;
+        }
+        if (newtop + 16 > window.innerHeight) {
+            Game.ball.css('top', window.innerHeight - 16 + 'px');
+            BallSpeed.y = -BallSpeed.y;
+        }
+    }
+
+    function movement() {
+        $('body').keydown(function(e) {
+            if (e.which == Controls.up1) {
+                moveUp(Game.paddle1);
+            }
+            if (e.which == Controls.down1) {
+                moveDown(Game.paddle1);
+            }
+            if (e.which == Controls.up2) {
+                moveUp(Game.paddle2);
+            }
+            if (e.which == Controls.down2) {
+                moveDown(Game.paddle2);
+            }
+            e.stopImmediatePropagation();
+        });
+    }
+
+    function moveUp(paddle) {
+        var top = paddle.position().top;
+        paddle.css('top', top - 10 + 'px');
+        var newtop = paddle.position().top;
+        if (newtop < 0) {
+            paddle.css('top', '0px');
+        }  
+    }
+
+    function moveDown(paddle) {
+        var top = paddle.position().top;
+        paddle.css('top', top + 10 + 'px');
+        var newtop = paddle.position().top;
+        if (newtop + 64 > window.innerHeight) {
+            paddle.css('top', window.innerHeight - 64 + 'px');
+        }
+    }
+    
+    game();
 </script>
 </html>
