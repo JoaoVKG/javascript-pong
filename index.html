@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Pong</title>
     <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="assets/css/style.css">
     <script
     src="https://code.jquery.com/jquery-3.2.1.min.js"
     integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
@@ -22,12 +22,18 @@
 </body>
 <script>
     Game = {
+        game: $('body'),
         maxFPS: 60,
         score1: parseInt($('#score1').text()),
         score2: parseInt($('#score2').text()),
         paddle1: $('#paddle1'),
         paddle2: $('#paddle2'),
         net: $('#net')
+    };
+    Sounds = {
+        hitpaddle: new Audio('assets/sounds/hitpaddle.wav'),
+        hitwall: new Audio('assets/sounds/hitwall.wav'),
+        opponentpoint: new Audio('assets/sounds/opponentpoint.wav')
     };
     Controls = {
         up1: 87,
@@ -41,16 +47,16 @@
         y: $('#ball').position().top,
         xspeed: 0,
         yspeed: 0
-    }
+    };
 
     function game() {
         reset();
+        paddleMovement();
         setInterval(update, 1000/Game.maxFPS);   
     }
 
     function update() {
         ballMovement();
-        paddleMovement();
         score();
         touchBall();
     }
@@ -62,7 +68,7 @@
         Ball.x = Ball.ball.position().left;
         Ball.xspeed = Math.random() < 0.5 ? 1 : -1;
         Ball.yspeed = Math.random() < 0.5 ? 1 : -1;
-        // Ball.xspeed = -1;
+        Ball.xspeed = 1;
         // Ball.yspeed = 0;
     }
 
@@ -74,10 +80,12 @@
         Ball.x = Ball.ball.position().left;
 
         if (Ball.y < 0) {
+            Sounds.hitwall.play();
             Ball.ball.css('top', '0px');
             Ball.yspeed = -Ball.yspeed;
         }
         if (Ball.y + 16 > window.innerHeight) {
+            Sounds.hitwall.play();
             Ball.ball.css('top', window.innerHeight - 16 + 'px');
             Ball.yspeed = -Ball.yspeed;
         }
@@ -86,11 +94,13 @@
     function score() {
         var left = Ball.ball.position().left;
         if (left < 0) {
+            Sounds.opponentpoint.play();
             Game.score2++;
             $('#score2').text(Game.score2);
             reset();
         }
         if (left + 16 > window.innerWidth) {
+            Sounds.opponentpoint.play();
             Game.score1++;
             $('#score1').text(Game.score1);
             reset();
@@ -98,16 +108,56 @@
     }
 
     function touchBall() {
-        if ((Game.paddle1.position().left + 16) > Ball.x && Ball.y < (Game.paddle1.position().top + 64) && (Ball.y + 16) > Game.paddle1.position().top) {
-            Ball.xspeed = -Ball.xspeed;
+        if (Game.paddle1.position().left > (Ball.x - 26)) {
+            if (Ball.y < (Game.paddle1.position().top + 48) && (Ball.y + 16) > (Game.paddle1.position().top + 16)) {
+                Sounds.hitpaddle.play();
+                Ball.xspeed = Ball.xspeed > 0 ? -1 : 1;
+            }
+            if (Ball.y > (Game.paddle1.position().top + 48) && Ball.y < (Game.paddle1.position().top + 64)) {
+                Sounds.hitpaddle.play();
+                if (Ball.xspeed == 2 || Ball.xspeed == -2) {
+                    Ball.xspeed = -Ball.xspeed;
+                } else {
+                    Ball.xspeed = -Ball.xspeed * 2;
+                }
+            }
+            if ((Ball.y + 16) < (Game.paddle1.position().top + 16) && (Ball.y + 16) > Game.paddle1.position().top) {
+                Sounds.hitpaddle.play();
+                if (Ball.xspeed == 2 || Ball.xspeed == -2) {
+                    Ball.xspeed = -Ball.xspeed;
+                } else {
+                    Ball.xspeed = -Ball.xspeed * 2;
+                }
+            }
         }
-        if ((Ball.x + 16) > Game.paddle2.position().left && Ball.y < (Game.paddle2.position().top + 64) && (Ball.y + 16) > Game.paddle2.position().top) {
-            Ball.xspeed = -Ball.xspeed;
+
+        if ((Ball.x + 26) > Game.paddle2.position().left) {
+            if (Ball.y < (Game.paddle2.position().top + 48) && (Ball.y + 16) > (Game.paddle2.position().top + 16)) {
+                Sounds.hitpaddle.play();
+                Ball.xspeed = Ball.xspeed > 0 ? -1 : 1;
+            }
+            if (Ball.y > (Game.paddle2.position().top + 48) && Ball.y < (Game.paddle2.position().top + 64)) {
+                Sounds.hitpaddle.play();
+                if (Ball.xspeed == 2 || Ball.xspeed == -2) {
+                    Ball.xspeed = -Ball.xspeed;
+                } else {
+                    Ball.xspeed = -Ball.xspeed * 2;
+                }
+            }
+            if ((Ball.y + 16) < (Game.paddle2.position().top + 16) && (Ball.y + 16) > Game.paddle2.position().top) {
+                Sounds.hitpaddle.play();
+                if (Ball.xspeed == 2 || Ball.xspeed == -2) {
+                    Ball.xspeed = -Ball.xspeed;
+                } else {
+                    Ball.xspeed = -Ball.xspeed * 2;
+                }
+            }
         }
+
     }
 
     function paddleMovement() {
-        $('body').keydown(function(e) {
+        Game.game.keydown(function(e) {
             if (e.which == Controls.up1) {
                 moveUp(Game.paddle1);
             }
@@ -116,6 +166,7 @@
             }
             if (e.which == Controls.up2) {
                 moveUp(Game.paddle2);
+                console.log(Game.paddle2.position().top);
             }
             if (e.which == Controls.down2) {
                 moveDown(Game.paddle2);
@@ -123,7 +174,7 @@
             e.stopImmediatePropagation();
         });
 
-        $('body').mousemove(function(e) {
+        Game.game.mousemove(function(e) {
             if (e.pageY < Game.paddle2.position().top) {
                 moveUp(Game.paddle2);
             }
@@ -139,7 +190,7 @@
         var newtop = paddle.position().top;
         if (newtop < 0) {
             paddle.css('top', '0px');
-        }  
+        }
     }
 
     function moveDown(paddle) {
